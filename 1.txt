@@ -1,0 +1,195 @@
+#include "help.h"
+
+typedef struct BinaryTreeNode{
+	int _val;
+	struct BinaryTreeNode* _left;
+	struct BinaryTreeNode* _right;
+} Node;
+
+Node* creatBinaryTree(char* src, int* idx){
+	if (src[*idx] != '#'){
+		Node* root = (Node*)malloc(sizeof(Node));
+		root->_val = src[*idx];
+		++(*idx);
+		root->_left = creatBinaryTree(src, idx);
+		++(*idx);
+		root->_right = creatBinaryTree(src, idx);
+		return root;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+// 后序遍历
+void post_traversal(Node* root){
+	stack<Node*> st;
+	Node* cur = root;
+	Node* prev = NULL;
+
+	while (cur || !st.empty()){
+		// 左子树全部入栈
+		while (cur){
+			st.push(cur);
+			cur = cur->_left;
+		}
+		// 此时左子树为空，无树入栈
+		// 获取栈顶元素，根据栈顶元素的情况，判断下一步需要进行的操作
+		cur = st.top();
+		// 如果该节点为叶子节点 或者 右子树已经访问完成就需要对该节点进行访问
+		if (cur->_right == NULL || cur->_right == prev){
+			printf("%c ", cur->_val);
+			st.pop();
+			prev = cur;
+			cur = NULL;
+		}// 否则访问右子树
+		else
+		{
+			cur = cur->_right;
+		}
+	}
+	printf("\n");
+}
+
+
+void find_path(Node* root, vector<char>& curPath, vector<vector<char>>& retPath){
+	if (root== NULL){
+		retPath.push_back(curPath);
+		return;
+	}
+	curPath.push_back(root->_val);
+	find_path(root->_left, curPath, retPath);
+	find_path(root->_right, curPath, retPath);
+	curPath.pop_back();
+}
+void test(){
+	char str[] = { "AB#D##CE#F###" };
+	int idx = 0;
+	Node* root = creatBinaryTree(str, &idx);
+	post_traversal(root);
+
+	cout << "树中所有的路径:" << endl;
+	vector<char> curPath;
+	vector<vector<char>> retPath;
+	find_path(root, curPath, retPath);
+	for (int i = 0; i < retPath.size(); ++i){
+		for (int j = 0; j < retPath[i].size(); ++j){
+			cout << retPath[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+int main(){
+	test();
+	system("pause");
+	return 0;
+}
+
+#if 0
+// 联合体也要考虑对齐问题
+// 共享的时候需要注意大小端问题
+union Un1{
+	char c[5];
+	int i;
+};
+
+union Un2{
+	short c[7];
+	int i;
+};
+
+int main(){
+	cout << sizeof(Un1) << endl; // 8
+	cout << sizeof(Un2) << endl; // 14+2 = 16
+	system("pause");
+	return 0;
+}
+#endif 
+
+// 配对使用
+#pragma pack(1)
+#pragma pack()
+
+#if 0
+#define off_set_of(type,member) (size_t)&(((type*)0)->member)
+
+typedef struct B{
+	char a; // 1
+	char b; // 2
+	int c; // 8
+	short d; // 10
+	double e; // 24
+} B;
+
+struct ip{
+	char _a : 1;
+	char _b : 8;
+	char _c : 2;
+};
+
+// 注意：如果位段中的类型是有符号的，位段的高位表示符号位.
+typedef struct A{
+	// unsigned int _a : 3;
+	int _a : 3;
+	int _b : 5;
+	int _c : 10;
+	int _d : 30;
+} A;
+
+// 注意：位段类型中也要考虑结构体对齐原则
+struct S{
+	// 不同类型之间不可以相互合并
+	// int 与 char 之间不可以合并
+	int e : 7;
+	char a : 3;
+	char b : 4;
+	char c : 5;
+	char d : 4;
+};
+
+int main(){
+	cout << sizeof(S) << endl;
+	A a;
+	a._a = 6;
+	a._b = 11;
+	a._c = 12;
+	a._d = 13;
+	cout << a._a << endl;
+	cout << a._b << endl;
+	cout << a._c << endl;
+	cout << a._d << endl;
+//	cout << sizeof(B) << endl;
+	//cout << sizeof(short) << endl;
+	//cout << sizeof(A) << endl;
+	system("pause");
+	return 0;
+}
+#endif
+
+#if 0 
+int main(){
+
+	typedef struct student{
+		int id;
+		short cd;
+		char name[12];
+		char gender[12];
+	} student;
+
+	cout << "sizoef(double) = "<<sizeof(double) << endl;
+	cout << "sizeof(long) = "<<sizeof(long) << endl;
+	cout << "sizeof(long long) = " << sizeof(long long) << endl;
+	student s;
+	
+	printf("%d\n", off_set_of(student, name));
+	cout << off_set_of(student, id)<<endl;
+	cout << off_set_of(student, cd) << endl;
+	cout << off_set_of(student, name) << endl;
+	cout << off_set_of(student, gender) << endl;
+	cout << endl;
+	system("pause");
+	return 0;
+}
+#endif
